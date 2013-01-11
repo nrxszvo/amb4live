@@ -13,7 +13,6 @@ var Ambisonics = {
     z: 0,
     
     sendCoordinates: function() {
-	post("mode:", this.mode, "\n");
 	switch (this.mode) {
 	case "aed":
 	    outlet(0, [this.mode,
@@ -42,16 +41,16 @@ var Ambisonics = {
 	post("args:", args, "\n");
 	switch (args[0]) {
 	case "current_output_sub_routing":
-	    if (this.track.get("current_output_routing") == "Ext. Out") {
-		if (parseInt(args[1]) != this.source) {
-		    this.remove();
-		    this.source = parseInt(args[1]);
-		    this.sendCoordinates();
+	    if (Ambisonics.track.get("current_output_routing") == "Ext. Out") {
+		if (parseInt(args[1]) != Ambisonics.source) {
+		    Ambisonics.remove();
+		    Ambisonics.source = parseInt(args[1]);
+		    Ambisonics.sendCoordinates();
 		}
 	    } else {
-		this.source = 0;
+		Ambisonics.source = 0;
 	    }
-	    post("source:", this.source,"\n");
+	    post("source:", Ambisonics.source,"\n");
 	    break;
 	}
     }
@@ -63,6 +62,6 @@ function setProperty(property, value) {
 }
   
 function bang() {
-    Ambisonics.track = new LiveAPI(Ambisonics.apiCallback, "this_device canonical_parent");
+    Ambisonics.track = new LiveAPI(Ambisonics.apiCallback, "Ambisonics_device canonical_parent");
     Ambisonics.track.property = "current_output_sub_routing";
 }
