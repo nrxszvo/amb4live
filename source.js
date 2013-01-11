@@ -62,6 +62,6 @@ function setProperty(property, value) {
 }
   
 function bang() {
-    Ambisonics.track = new LiveAPI(Ambisonics.apiCallback, "Ambisonics_device canonical_parent");
+    Ambisonics.track = new LiveAPI(Ambisonics.apiCallback, "this_device canonical_parent");
     Ambisonics.track.property = "current_output_sub_routing";
 }
