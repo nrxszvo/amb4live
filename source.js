@@ -3,22 +3,19 @@ this.outlets = 2;
 
 function Source(parseCh) {
     this.parseCh = parseCh;
-    this.source = 0;
+    this.ch = 0;
     this.a = 0;
     this.e = 0;
     this.d = 0;
-    this.x = 0;
-    this.y = 0;
-    this.z = 0;
     this.sendCoordinates = sendCoordinates;
     this.remove = remove;
     this.updateCh = updateCh;
 }
 
 function sendCoordinates(spread) {
-    if (this.source > 0) {
+    if (this.ch > 0) {
 	outlet(0, ["aed",
-		   this.source,
+		   this.ch,
 		   this.a + spread,
 		   this.e,
 		   this.d,
@@ -27,20 +24,20 @@ function sendCoordinates(spread) {
 }
 
 function remove() {
-    outlet(1, this.source);
+    outlet(1, this.ch);
 }
 
 function updateCh(chs) {
     newCh = this.parseCh(chs);
-    if (newCh != this.source) {
+    if (newCh != this.ch) {
 	this.remove();
-	this.source = newCh;
+	this.ch = newCh;
 	this.sendCoordinates();
     }
 }
 
 function parseLeft(chs) {
-    var re = new RegExp("([0-9])/?([0-9])?");
+    var re = new RegExp("([0-9]+)/?([0-9]+)?");
     return parseInt(re.exec(chs)[1]);
 }    
 
@@ -65,10 +62,9 @@ var Sources = {
 	    this.sLeft[property] = value;
 	    this.sRight[property] = value;
 	}
-	
 	this.sendCoordinates();
     },
-
+    
     sendCoordinates: function() {
 	if (this.sRight.source != 0) {
 	    this.sLeft.sendCoordinates(-1*this.spread/2.0);
@@ -76,28 +72,31 @@ var Sources = {
 	} else {
 	    this.sLeft.sendCoordinates(0);
 	}
+    },
+
+    updateChs: function(chs) {
+	this.sLeft.updateCh(chs);
+	this.sRight.updateCh(chs);
     }
 };
-
-function apiCallback(args) {
-    if (args[0] == "current_output_sub_routing") {
-	if (Sources.track.get("current_output_routing") == "Ext. Out") {
-	    Sources.sLeft.updateCh(args[1]);
-	    Sources.sRight.updateCh(args[1]);
-	} else {
-	    Sources.sLeft.source = 0;
-	    Sources.sRight.source = 0;
-	}
-	Sources.sendCoordinates();
-    }
-}
 
 function setProperty(property, value) {
     Sources.setProperty(property, value);
 }
 
+function apiCallback(args) {
+    if (args[0] == "current_output_sub_routing") {
+	if (Sources.track.get("current_output_routing") == "Ext. Out") {
+	    Sources.updateChs(args[1]);
+	} else {
+	    Sources.updateChs('0/0')	       
+	}
+	post("left: ", Sources.sLeft.ch, " right: ", Sources.sRight.ch, "\n");
+	Sources.sendCoordinates();
+    }
+}
+
 function bang() {
-    //Sources.apiCallback(["current_output_sub_routing", "1/2"]);
     Sources.track = new LiveAPI(apiCallback, "this_device canonical_parent");
     Sources.track.property = "current_output_sub_routing";
 }
