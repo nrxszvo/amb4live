@@ -66,10 +66,11 @@ var Sources = {
     },
     
     sendCoordinates: function() {
-	if (this.sRight.source != 0) {
+	if (this.sRight.ch != 0) {
 	    this.sLeft.sendCoordinates(-1*this.spread/2.0);
 	    this.sRight.sendCoordinates(this.spread/2.0);
 	} else {
+	    post("a: ", this.sLeft.a, "\n");
 	    this.sLeft.sendCoordinates(0);
 	}
     },
